@@ -14,6 +14,5 @@ namespace Model.RESUME
         public Resume Template { get; set; }
         public string Category { get; set; }
         public string PreviewImagePath { get; set; } // Path to image in wwwroot
-        public string Preview { get; set; } // Path to image in wwwroot
     }
 }
