@@ -1,0 +1,330 @@
+﻿@model Model.RESUME.Resume
+
+@{
+    ViewData["Title"] = "CreateResume";
+}
+
+<div class="container mt-4">
+    <h1 style="text-align: center; color: black; font-weight: bold;">Create Professional Resume</h1>
+
+    <form asp-action="CreateResume" id="resumeForm" class="mt-4">
+        @Html.AntiForgeryToken()
+
+        <!-- Personal Information Card -->
+        <div class="card mb-4 shadow">
+            <div class="card-header bg-secondary text-white">
+                <h4><i class="fas fa-user-circle mr-2"></i>Personal Information</h4>          
+            </div>
+            <div class="card-body">
+                <div class="form-group row mb-3">
+                    <label asp-for="Name" class="col-md-2 col-form-label"></label>
+                    <div class="col-md-10">
+                        <input asp-for="Name" class="form-control" placeholder="Your full name" />
+                        <span asp-validation-for="Name" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <!-- Other personal info fields -->
+                <div class="form-group row mb-3">
+                    <label asp-for="Title" class="col-md-2 col-form-label"></label>
+                    <div class="col-md-10">
+                        <input asp-for="Title" class="form-control" placeholder="e.g. Software Engineer" />
+                        <span asp-validation-for="Title" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="form-group row mb-3">
+                    <label asp-for="Email" class="col-md-2 col-form-label"></label>
+                    <div class="col-md-10">
+                        <input asp-for="Email" class="form-control" placeholder="your.email@example.com" />
+                        <span asp-validation-for="Email" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="form-group row mb-3">
+                    <label asp-for="LinkedIn" class="col-md-2 col-form-label"></label>
+                    <div class="col-md-10">
+                        <input asp-for="LinkedIn" class="form-control" placeholder="LinkedIn profile URL" />
+                        <span asp-validation-for="LinkedIn" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="form-group row mb-3">
+                    <label asp-for="Phone" class="col-md-2 col-form-label"></label>
+                    <div class="col-md-10">
+                        <input asp-for="Phone" class="form-control" placeholder="Phone number" />
+                        <span asp-validation-for="Phone" class="text-danger"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Skills Card -->
+        <div class="card mb-4 shadow">
+            <div class="card-header bg-secondary text-white">
+                <h4><i class="fas fa-tools mr-2"></i>Skills</h4>
+            </div>
+            <div class="card-body">
+                <div id="skillContainer">
+                    @for (int i = 0; i < Model.Skills.Count; i++)
+                    {
+                        <div class="form-group skill-entry">
+                            <div class="input-group">
+                                <input asp-for="Skills[i].SkillName" class="form-control" placeholder="e.g. ASP.NET Core" />
+                                <div class="input-group-append">
+                                    <button type="button" class="btn btn-outline-danger remove-skill">
+                                        <i class="fas fa-trash-alt"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+                <button type="button" id="addSkill" class="btn btn-success mt-2">
+                    <i class="fas fa-plus-circle mr-2"></i>Add Skill
+                </button>
+            </div>
+        </div>
+
+        <!-- Experience Card -->
+        <div class="card mb-4 shadow">
+            <div class="card-header bg-secondary text-white">
+                <h4><i class="fas fa-briefcase mr-2"></i>Work Experience</h4>
+            </div>
+            <div class="card-body" id="experienceContainer">
+                @for (int i = 0; i < Model.Experiences.Count; i++)
+                {
+                    <div class="experience-entry card mb-3">
+                        <div class="card-body">
+                            <div class="form-group">
+                                <label>Company</label>
+                                <input asp-for="Experiences[i].Company" class="form-control" placeholder="Company name" />
+                            </div>
+                            <div class="form-group">
+                                <label>Position</label>
+                                <input asp-for="Experiences[i].Position" class="form-control" placeholder="Your job title" />
+                            </div>
+                            <div class="form-group">
+                                <label>Duration</label>
+                                <input asp-for="Experiences[i].Duration" class="form-control" placeholder="e.g. Jan 2020 - Present" />
+                            </div>
+                            <div class="form-group">
+                                <label>Responsibilities</label>
+                                <textarea asp-for="Experiences[i].Responsibilities" class="form-control" rows="3"
+                                          placeholder="Describe your responsibilities and achievements"></textarea>
+                            </div>
+                            <button type="button" class="btn btn-outline-danger remove-experience mt-2">
+                                <i class="fas fa-trash-alt mr-2"></i>Remove Experience
+                            </button>
+                        </div>
+                    </div>
+                }
+                <button type="button" id="addExperience" class="btn btn-success">
+                    <i class="fas fa-plus-circle mr-2"></i>Add Experience
+                </button>
+            </div>
+        </div>
+
+        <!-- Education Card -->
+        <div class="card mb-4 shadow">
+            <div class="card-header bg-secondary text-white">
+                <h4><i class="fas fa-graduation-cap mr-2"></i>Education</h4>
+            </div>
+            <div class="card-body" id="educationContainer">
+                @for (int i = 0; i < Model.Educations.Count; i++)
+                {
+                    <div class="education-entry card mb-3">
+                        <div class="card-body">
+                            <div class="form-group">
+                                <label>Institution</label>
+                                <input asp-for="Educations[i].Institution" class="form-control" placeholder="School/University name" />
+                            </div>
+                            <div class="form-group">
+                                <label>Degree</label>
+                                <input asp-for="Educations[i].Degree" class="form-control" placeholder="e.g. Bachelor of Technology" />
+                            </div>
+                            <div class="form-group">
+                                <label>Year</label>
+                                <input asp-for="Educations[i].Year" class="form-control" placeholder="e.g. 2019-2023" />
+                            </div>
+                            <button type="button" class="btn btn-outline-danger remove-education mt-2">
+                                <i class="fas fa-trash-alt mr-2"></i>Remove Education
+                            </button>
+                        </div>
+                    </div>
+                }
+                <button type="button" id="addEducation" class="btn btn-success">
+                    <i class="fas fa-plus-circle mr-2"></i>Add Education
+                </button>
+            </div>
+        </div>
+
+        <!-- Form Submission -->
+        <div class="form-group text-center">
+            <button type="submit" class="btn btn-primary btn-lg mr-3">
+                <i class="fas fa-save mr-2"></i>Save Resume
+            </button>
+            <a asp-action="Index" class="btn btn-secondary btn-lg">
+                <i class="fas fa-arrow-left mr-2"></i>Cancel
+            </a>
+        </div>
+    </form>
+</div>
+
+@section Styles {
+    @* <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" /> *@
+    <style>
+        .card {
+            border-radius: 10px;
+        }
+
+        .card-header {
+            border-radius: 10px 10px 0 0 !important;
+        }
+
+        .skill-entry, .experience-entry, .education-entry {
+            margin-bottom: 15px;
+            padding: 10px;
+            background-color: #f8f9fa;
+            border-radius: 5px;
+        }
+
+        .input-group-append .btn {
+            border-radius: 0 5px 5px 0;
+        }
+    </style>
+}
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+    <script>
+        $(document).ready(function () {
+            // Initialize counters
+            let skillIndex = @Model.Skills.Count;
+            let expIndex = @Model.Experiences.Count;
+            let eduIndex = @Model.Educations.Count;
+
+            // Add Skill
+            $("#addSkill").click(function () {
+                const newEntry = $(`
+                    <div class="form-group skill-entry">
+                        <div class="input-group">
+                            <input name="Skills[${skillIndex}].SkillName" class="form-control" placeholder="e.g. ASP.NET Core" />
+                            <div class="input-group-append">
+                                <button type="button" class="btn btn-outline-danger remove-skill">
+                                    <i class="fas fa-trash-alt"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `);
+                $("#skillContainer").append(newEntry);
+                skillIndex++;
+            });
+
+            // Add Experience
+            $("#addExperience").click(function () {
+                const newEntry = $(`
+                    <div class="experience-entry card mb-3">
+                        <div class="card-body">
+                            <div class="form-group">
+                                <label>Company</label>
+                                <input name="Experiences[${expIndex}].Company" class="form-control" placeholder="Company name" />
+                            </div>
+                            <div class="form-group">
+                                <label>Position</label>
+                                <input name="Experiences[${expIndex}].Position" class="form-control" placeholder="Your job title" />
+                            </div>
+                            <div class="form-group">
+                                <label>Duration</label>
+                                <input name="Experiences[${expIndex}].Duration" class="form-control" placeholder="e.g. Jan 2020 - Present" />
+                            </div>
+                            <div class="form-group">
+                                <label>Responsibilities</label>
+                                <textarea name="Experiences[${expIndex}].Responsibilities" class="form-control" rows="3"
+                                          placeholder="Describe your responsibilities and achievements"></textarea>
+                            </div>
+                            <button type="button" class="btn btn-outline-danger remove-experience">
+                                <i class="fas fa-trash-alt mr-2"></i>Remove Experience
+                            </button>
+                        </div>
+                    </div>
+                `);
+                $("#experienceContainer").append(newEntry);
+                expIndex++;
+            });
+
+            // Add Education
+            $("#addEducation").click(function () {
+                const newEntry = $(`
+                    <div class="education-entry card mb-3">
+                        <div class="card-body">
+                            <div class="form-group">
+                                <label>Institution</label>
+                                <input name="Educations[${eduIndex}].Institution" class="form-control" placeholder="School/University name" />
+                            </div>
+                            <div class="form-group">
+                                <label>Degree</label>
+                                <input name="Educations[${eduIndex}].Degree" class="form-control" placeholder="e.g. Bachelor of Technology" />
+                            </div>
+                            <div class="form-group">
+                                <label>Year</label>
+                                <input name="Educations[${eduIndex}].Year" class="form-control" placeholder="e.g. 2019-2023" />
+                            </div>
+                            <button type="button" class="btn btn-outline-danger remove-education">
+                                <i class="fas fa-trash-alt mr-2"></i>Remove Education
+                            </button>
+                        </div>
+                    </div>
+                `);
+                $("#educationContainer").append(newEntry);
+                eduIndex++;
+            });
+
+            // Remove handlers with event delegation
+            $(document).on('click', '.remove-skill', function () {
+                $(this).closest('.skill-entry').remove();
+                reindexSkills();
+            });
+
+            $(document).on('click', '.remove-experience', function () {
+                $(this).closest('.experience-entry').remove();
+                reindexExperiences();
+            });
+
+            $(document).on('click', '.remove-education', function () {
+                $(this).closest('.education-entry').remove();
+                reindexEducation();
+            });
+
+            // Reindexing functions
+            function reindexSkills() {
+                $('.skill-entry').each(function (i) {
+                    $(this).find('input').attr('name', `Skills[${i}].SkillName`);
+                });
+                skillIndex = $('.skill-entry').length;
+            }
+
+            function reindexExperiences() {
+                $('.experience-entry').each(function (i) {
+                    $(this).find('input[name*="Company"]').attr('name', `Experiences[${i}].Company`);
+                    $(this).find('input[name*="Position"]').attr('name', `Experiences[${i}].Position`);
+                    $(this).find('input[name*="Duration"]').attr('name', `Experiences[${i}].Duration`);
+                    $(this).find('textarea').attr('name', `Experiences[${i}].Responsibilities`);
+                });
+                expIndex = $('.experience-entry').length;
+            }
+
+            function reindexEducation() {
+                $('.education-entry').each(function (i) {
+                    $(this).find('input[name*="Institution"]').attr('name', `Educations[${i}].Institution`);
+                    $(this).find('input[name*="Degree"]').attr('name', `Educations[${i}].Degree`);
+                    $(this).find('input[name*="Year"]').attr('name', `Educations[${i}].Year`);
+                });
+                eduIndex = $('.education-entry').length;
+            }
+        });
+    </script>
+}

@@ -1,0 +1,63 @@
+/// <summary>
+///  CREATE TABLE
+/// </summary>
+/// <param name="user"></param>
+/// <returns></returns>
+
+CREATE TABLE Users (
+    Id INT IDENTITY(1,1) PRIMARY KEY,
+    FullName VARCHAR(255) NOT NULL,
+    Email VARCHAR(255) NOT NULL,
+    Password VARCHAR(255) NOT NULL,
+    IdentityImageFileName VARCHAR(255) NULL,
+    IdentityImageFileData VARBINARY(MAX) NULL,
+    IdentityImageContentType VARCHAR(100) NULL
+);
+
+
+/// <summary>
+///  SELECT USERS
+/// </summary>
+/// <param name="user"></param>
+/// <returns></returns>
+
+SELECT TOP (1000) [Id]
+      ,[FullName]
+      ,[Email]
+      ,[Password]
+      ,[IdentityImageFileName]
+      ,[IdentityImageFileData]
+      ,[IdentityImageContentType]
+  FROM [Migrate_Project].[dbo].[Users]
+
+
+/// <summary>
+///  PROCEDURE
+/// </summary>
+/// <param name="user"></param>
+/// <returns></returns>
+
+USE [Migrate_Project]
+GO
+/****** Object:  StoredProcedure [dbo].[InsertUser]    Script Date: 3/11/2025 12:29:37 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+ALTER PROCEDURE [dbo].[InsertUser]
+    @FullName NVARCHAR(255),
+    @Email NVARCHAR(255),
+    @Password NVARCHAR(255),
+    @IdentityImageFileName NVARCHAR(255) = NULL,
+    @IdentityImageFileData VARBINARY(MAX) = NULL,
+    @IdentityImageContentType NVARCHAR(100) = NULL
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    INSERT INTO Users (FullName, Email, Password, IdentityImageFileName, IdentityImageFileData, IdentityImageContentType)
+    VALUES (@FullName, @Email, @Password, @IdentityImageFileName, @IdentityImageFileData, @IdentityImageContentType);
+    
+    -- Return the inserted User ID
+    SELECT SCOPE_IDENTITY() AS InsertedUserId;
+END;

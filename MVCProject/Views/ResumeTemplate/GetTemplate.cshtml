@@ -1,0 +1,35 @@
+﻿@model IEnumerable<Model.RESUME.ResumeTemplate> 
+
+@{
+    ViewData["Title"] = "GetTemplate";
+    ViewBag.Title = "Choose a Resume Template";
+}
+
+<div class="container mt-4">
+    <h2>@ViewBag.Title</h2>
+    <p class="lead">Select a template to start building your resume</p>
+
+    <div class="row">
+        @foreach (var template in Model)
+        {
+            <div class="col-md-4 mb-4">
+                <div class="card h-100">
+                    <img src="@template.PreviewImagePath" class="card-img-top" alt="@template.Name">
+                    <div class="card-body">
+                        <h5 class="card-title">@template.Name</h5>
+                        <p class="card-text">@template.Description</p>
+                        <span class="badge bg-primary">@template.Category</span>
+                    </div>
+                    <div class="card-footer">
+                        @Html.ActionLink("Use This Template", "CreateFromTemplate", new { id = template.Id },
+                        new { @class = "btn btn-primary" })
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+<div>
+    <a asp-action="Index">Back to List</a>
+</div>

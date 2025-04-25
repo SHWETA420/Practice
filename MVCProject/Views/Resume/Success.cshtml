@@ -1,0 +1,19 @@
+﻿@{
+    ViewData["Title"] = "Success";
+}
+
+<div class="container text-center mt-5">
+    <div class="card shadow p-5">
+        <i class="fas fa-check-circle text-success mb-4" style="font-size: 5rem;"></i>
+        <h2>Resume Created Successfully!</h2>
+        <p class="lead">Your professional resume has been saved.</p>
+        <div class="mt-4">
+            <a asp-action="CreateResume" class="btn btn-primary mr-3">
+                <i class="fas fa-plus-circle mr-2"></i>Create Another
+            </a>
+            <a href="#" class="btn btn-success">
+                <i class="fas fa-file-pdf mr-2"></i>Download PDF
+            </a>
+        </div>
+    </div>
+</div>
