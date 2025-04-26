@@ -7,7 +7,9 @@ on:
     branches: [ "master" ]
 
 env:
-  DOTNET_VERSION: '9.0.x'  # Using .NET 9 (latest stable)
+  DOTNET_VERSION: '9.0.x'
+  DOCKER_IMAGE: mvcapp
+  DOCKER_TAG: latest
 
 jobs:
   build-and-test:
@@ -30,6 +32,35 @@ jobs:
     - name: Test
       run: dotnet test --no-build --verbosity normal
     
-    # Optional: Add publish step if you need deployment artifacts
-    - name: Publish
-      run: dotnet publish -c Release -o ./publish
+    - name: Docker Build
+      run: docker build -f dockerfile/Dockerfile -t ${{ env.DOCKER_IMAGE }} .
+
+  deploy:
+    needs: build-and-test  # Corrected job dependency
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Login to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKER_HUB_USERNAME }}
+          password: ${{ secrets.DOCKER_HUB_TOKEN }}
+
+      - name: Push to Registry
+        run: |
+          docker tag ${{ env.DOCKER_IMAGE }} ${{ secrets.DOCKER_HUB_USERNAME }}/${{ env.DOCKER_IMAGE }}:${{ env.DOCKER_TAG }}
+          docker push ${{ secrets.DOCKER_HUB_USERNAME }}/${{ env.DOCKER_IMAGE }}:${{ env.DOCKER_TAG }}
+
+      - name: Deploy to Server
+        uses: appleboy/ssh-action@v0.1.10
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USERNAME }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            docker pull ${{ secrets.DOCKER_HUB_USERNAME }}/${{ env.DOCKER_IMAGE }}:${{ env.DOCKER_TAG }}
+            docker stop mvcapp || true
+            docker rm mvcapp || true
+            docker run -d -p 80:80 --name mvcapp ${{ secrets.DOCKER_HUB_USERNAME }}/${{ env.DOCKER_IMAGE }}:${{ env.DOCKER_TAG }}
