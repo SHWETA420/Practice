@@ -6,6 +6,9 @@ on:
   pull_request:
     branches: [ "master" ]
 
+env:
+  DOTNET_VERSION: '9.0.x'  # Using .NET 9 (latest stable)
+
 jobs:
   build-and-test:
     runs-on: windows-latest
@@ -13,10 +16,10 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     
-    - name: Setup .NET
+    - name: Setup .NET ${{ env.DOTNET_VERSION }}
       uses: actions/setup-dotnet@v3
       with:
-        dotnet-version: 8.0.x  # Change to your .NET version
+        dotnet-version: ${{ env.DOTNET_VERSION }}
     
     - name: Restore dependencies
       run: dotnet restore
@@ -26,3 +29,7 @@ jobs:
     
     - name: Test
       run: dotnet test --no-build --verbosity normal
+    
+    # Optional: Add publish step if you need deployment artifacts
+    - name: Publish
+      run: dotnet publish -c Release -o ./publish
