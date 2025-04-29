@@ -14,12 +14,15 @@ jobs:
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
+
       - name: Setup .NET
         uses: actions/setup-dotnet@v3
         with:
           dotnet-version: ${{ env.DOTNET_VERSION }}
+
       - name: Build
         run: dotnet build --configuration Release
+
       - name: Test
         run: dotnet test
 
@@ -28,6 +31,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
       - name: Docker Build
         run: |
           docker build -f dockerfile/Dockerfile -t ${{ env.DOCKER_IMAGE }}:${{ env.DOCKER_TAG }} .
@@ -35,18 +39,17 @@ jobs:
 
   local-deploy:
     needs: docker-build
-    runs-on: self-hosted
+    runs-on: self-hosted  # 👈 Your self-hosted runner
     steps:
       - uses: actions/checkout@v4
 
       - name: Stop and remove old container
         shell: powershell
         run: |
-          docker stop mvcapp 2>$null
-          docker rm mvcapp 2>$null
+          try { docker stop mvcapp 2>$null } catch { Write-Host "Container already stopped or does not exist." }
+          try { docker rm mvcapp 2>$null } catch { Write-Host "Container already removed or does not exist." }
 
       - name: Run new container
-        shell: powershell
         run: |
           docker run -d `
             -p 80:80 `
