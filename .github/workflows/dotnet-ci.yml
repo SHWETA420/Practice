@@ -39,17 +39,19 @@ jobs:
 
   local-deploy:
     needs: docker-build
-    runs-on: self-hosted  # 👈 Your self-hosted runner
+    runs-on: self-hosted  # For deploying locally
     steps:
       - uses: actions/checkout@v4
 
       - name: Stop and remove old container
         shell: powershell
         run: |
-          try { docker stop mvcapp 2>$null } catch { Write-Host "Container already stopped or does not exist." }
-          try { docker rm mvcapp 2>$null } catch { Write-Host "Container already removed or does not exist." }
+          $ErrorActionPreference = 'Continue'
+          docker stop mvcapp 2>$null || Write-Host "Container already stopped or does not exist."
+          docker rm mvcapp 2>$null || Write-Host "Container already removed or does not exist."
 
       - name: Run new container
+        shell: powershell
         run: |
           docker run -d `
             -p 80:80 `
