@@ -1,4 +1,4 @@
-name: .NET Local Deployment
+name: .NET CI/CD Pipeline (Local)
 
 on:
   push:
@@ -6,12 +6,12 @@ on:
 
 env:
   DOTNET_VERSION: '9.0.x'
-  CONTAINER_NAME: mvcapp
-  PORT: 80
+  DOCKER_IMAGE: mvcapp
+  DOCKER_TAG: latest
 
 jobs:
   build-and-test:
-    runs-on: windows-latest  # Or ubuntu-latest
+    runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
       - name: Setup .NET
@@ -23,19 +23,37 @@ jobs:
       - name: Test
         run: dotnet test
 
-  deploy-local:
+  docker-build:
     needs: build-and-test
-    runs-on: self-hosted  # Critical for local deployment
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Build Docker Image
+      - name: Docker Build
         run: |
-          docker build -f dockerfile/Dockerfile -t ${{ env.CONTAINER_NAME }} .
-      - name: Deploy Container
+          docker build -f dockerfile/Dockerfile -t ${{ env.DOCKER_IMAGE }}:${{ env.DOCKER_TAG }} .
+          docker tag ${{ env.DOCKER_IMAGE }}:${{ env.DOCKER_TAG }} ${{ env.DOCKER_IMAGE }}:latest
+
+  local-deploy:
+    needs: docker-build
+    runs-on: self-hosted  # 👈 Critical change for local deployment
+    steps:
+      - uses: actions/checkout@v4
+
+      # Stop and remove the old container (if it exists)
+      - name: Stop and remove old container
         run: |
-          docker stop ${{ env.CONTAINER_NAME }} || true
-          docker rm ${{ env.CONTAINER_NAME }} || true
-          docker run -d \
-            -p ${{ env.PORT }}:80 \
-            --name ${{ env.CONTAINER_NAME }} \
-            ${{ env.CONTAINER_NAME }}
+          try {
+            docker stop mvcapp
+          } catch {
+            Write-Host "Container already stopped or does not exist."
+          }
+          try {
+            docker rm mvcapp
+          } catch {
+            Write-Host "Container already removed or does not exist."
+          }
+
+      # Run the new container
+      - name: Run new container
+        run: |
+          docker run -d -p 80:80 --name mvcapp mvcapp
