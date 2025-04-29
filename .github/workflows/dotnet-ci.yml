@@ -35,18 +35,19 @@ jobs:
 
   local-deploy:
     needs: docker-build
-    runs-on: self-hosted  # 👈 Critical change for local deployment
+    runs-on: self-hosted
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Stop and remove old container
+        shell: pwsh
         run: |
-          docker stop mvcapp || true
-          docker rm mvcapp || true
-      
+          docker stop mvcapp 2>$null
+          docker rm mvcapp 2>$null
+
       - name: Run new container
         run: |
-          docker run -d \
-            -p 80:80 \
-            --name mvcapp \
+          docker run -d `
+            -p 80:80 `
+            --name mvcapp `
             ${{ env.DOCKER_IMAGE }}:${{ env.DOCKER_TAG }}
