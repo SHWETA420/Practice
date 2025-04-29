@@ -1,4 +1,4 @@
-name: .NET CI/CD Pipeline (Local)
+name: .NET Local Deployment
 
 on:
   push:
@@ -6,54 +6,36 @@ on:
 
 env:
   DOTNET_VERSION: '9.0.x'
-  DOCKER_IMAGE: mvcapp
-  DOCKER_TAG: latest
+  CONTAINER_NAME: mvcapp
+  PORT: 80
 
 jobs:
   build-and-test:
-    runs-on: windows-latest
+    runs-on: windows-latest  # Or ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
       - name: Setup .NET
         uses: actions/setup-dotnet@v3
         with:
           dotnet-version: ${{ env.DOTNET_VERSION }}
-
       - name: Build
         run: dotnet build --configuration Release
-
       - name: Test
         run: dotnet test
 
-  docker-build:
+  deploy-local:
     needs: build-and-test
-    runs-on: ubuntu-latest
+    runs-on: self-hosted  # Critical for local deployment
     steps:
       - uses: actions/checkout@v4
-
-      - name: Docker Build
+      - name: Build Docker Image
         run: |
-          docker build -f dockerfile/Dockerfile -t ${{ env.DOCKER_IMAGE }}:${{ env.DOCKER_TAG }} .
-          docker tag ${{ env.DOCKER_IMAGE }}:${{ env.DOCKER_TAG }} ${{ env.DOCKER_IMAGE }}:latest
-
-  local-deploy:
-    needs: docker-build
-    runs-on: self-hosted  # For deploying locally
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Stop and remove old container
-        shell: powershell
+          docker build -f dockerfile/Dockerfile -t ${{ env.CONTAINER_NAME }} .
+      - name: Deploy Container
         run: |
-          $ErrorActionPreference = 'Continue'
-          docker stop mvcapp 2>$null || Write-Host "Container already stopped or does not exist."
-          docker rm mvcapp 2>$null || Write-Host "Container already removed or does not exist."
-
-      - name: Run new container
-        shell: powershell
-        run: |
-          docker run -d `
-            -p 80:80 `
-            --name mvcapp `
-            ${{ env.DOCKER_IMAGE }}:${{ env.DOCKER_TAG }}
+          docker stop ${{ env.CONTAINER_NAME }} || true
+          docker rm ${{ env.CONTAINER_NAME }} || true
+          docker run -d \
+            -p ${{ env.PORT }}:80 \
+            --name ${{ env.CONTAINER_NAME }} \
+            ${{ env.CONTAINER_NAME }}
