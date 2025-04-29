@@ -40,12 +40,13 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Stop and remove old container
-        shell: pwsh
+        shell: powershell
         run: |
           docker stop mvcapp 2>$null
           docker rm mvcapp 2>$null
 
       - name: Run new container
+        shell: powershell
         run: |
           docker run -d `
             -p 80:80 `
