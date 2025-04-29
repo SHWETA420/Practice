@@ -41,7 +41,7 @@ jobs:
 
       # PowerShell script to stop, remove, and run the Docker container
       - name: Stop and Remove Old Container (if any)
-        shell: pwsh
+        shell: powershell  # Using Windows PowerShell instead of pwsh
         run: |
           $ErrorActionPreference = 'Continue'
 
