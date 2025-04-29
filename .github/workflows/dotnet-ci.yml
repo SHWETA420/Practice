@@ -39,21 +39,32 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      # Stop and remove the old container (if it exists)
-      - name: Stop and remove old container
+      # PowerShell script to stop, remove, and run the Docker container
+      - name: Stop and Remove Old Container (if any)
+        shell: pwsh
         run: |
-          try {
-            docker stop mvcapp
-          } catch {
-            Write-Host "Container already stopped or does not exist."
-          }
-          try {
-            docker rm mvcapp
-          } catch {
-            Write-Host "Container already removed or does not exist."
+          $ErrorActionPreference = 'Continue'
+
+          # Check if the container exists
+          $container = docker ps -a -q -f "name=mvcapp"
+
+          if ($container) {
+              # Check if the container is running
+              $isRunning = docker inspect -f '{{.State.Running}}' $container
+              if ($isRunning -eq "true") {
+                  Write-Host "Stopping the running container..."
+                  docker stop mvcapp
+              } else {
+                  Write-Host "Container is already stopped."
+              }
+
+              Write-Host "Removing the container..."
+              docker rm mvcapp
+          } else {
+              Write-Host "No container named 'mvcapp' exists."
           }
 
       # Run the new container
-      - name: Run new container
+      - name: Run New Container
         run: |
-          docker run -d -p 80:80 --name mvcapp mvcapp
+          docker run -d -p 80:80 --name mvcapp ${{ env.DOCKER_IMAGE }}:${{ env.DOCKER_TAG }}
